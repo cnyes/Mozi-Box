@@ -3,10 +3,13 @@
 ARG BUILD_IMG_NAME
 FROM ${BUILD_IMG_NAME} AS build-stage
 
+ARG BUILD_VERSION
+
 COPY ./ /srv/app
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 RUN composer install --no-interaction --no-dev --no-progress --no-suggest --no-ansi --prefer-dist --optimize-autoloader && \
+    sed -i "s/dev-master/${BUILD_VERSION}/g" ./config/app.php && \
     ./cnyes-deployment-cli app:build cnyes-deployment-cli
 
 #### final stages ####
@@ -18,3 +21,5 @@ LABEL maintainer="Cnyes Frontend Team <rd-backend@cnyes.com>"
 ENTRYPOINT [ "/usr/bin/cnyes-deployment-cli" ]
 
 COPY --from=build-stage /srv/app/builds/cnyes-deployment-cli /usr/bin
+
+RUN apk add --no-cache git

@@ -12,5 +12,6 @@ services:
       dockerfile: Dockerfile.Release
       args:
         BUILD_IMG_NAME: "${IMG_REPO:-cnyes-media-be}/cnyes-deployment-cli-dev:${IMG_VERSION:-latest}"
+        BUILD_VERSION: "Build-${IMG_VERSION:-Dev-Release}"
     image: "${IMG_REPO:-cnyes-media-be}/cnyes-deployment-cli:${IMG_VERSION:-latest}"
     network_mode: bridge
