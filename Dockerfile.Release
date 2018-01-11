@@ -5,9 +5,6 @@ FROM ${BUILD_IMG_NAME} AS build-stage
 
 ARG BUILD_VERSION
 
-COPY ./ /srv/app
-COPY --from=composer /usr/bin/composer /usr/bin/composer
-
 RUN composer install --no-interaction --no-dev --no-progress --no-suggest --no-ansi --prefer-dist --optimize-autoloader && \
     sed -i "s/dev-master/${BUILD_VERSION}/g" ./config/app.php && \
     ./cnyes-deployment-cli app:build cnyes-deployment-cli
