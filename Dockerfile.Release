@@ -1,0 +1,20 @@
+#### build stages ####
+
+ARG BUILD_IMG_NAME
+FROM ${BUILD_IMG_NAME} AS build-stage
+
+COPY ./ /srv/app
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+RUN composer install --no-interaction --no-dev --no-progress --no-suggest --no-ansi --prefer-dist --optimize-autoloader && \
+    ./cnyes-deployment-cli app:build cnyes-deployment-cli
+
+#### final stages ####
+
+FROM php:7.1-cli-alpine
+
+LABEL maintainer="Cnyes Frontend Team <rd-backend@cnyes.com>"
+
+ENTRYPOINT [ "/usr/bin/cnyes-deployment-cli" ]
+
+COPY --from=build-stage /srv/app/builds/cnyes-deployment-cli /usr/bin

@@ -1,0 +1,7 @@
+vendor
+builds/
+!builds/*.xml
+**/.DS_Store
+.git
+Dockerfile*
+.dockerignore

@@ -1,0 +1,16 @@
+version: '2.2'
+services:
+  cnyes_deployment_cli:
+    build:
+      context: ./
+    image: "${IMG_REPO:-cnyes-media-be}/cnyes-deployment-cli-dev:${IMG_VERSION:-latest}"
+    command: ["sleep", "100000"]
+    network_mode: bridge
+  cnyes_deployment_cli_release:
+    build:
+      context: ./
+      dockerfile: Dockerfile.Release
+      args:
+        BUILD_IMG_NAME: "${IMG_REPO:-cnyes-media-be}/cnyes-deployment-cli-dev:${IMG_VERSION:-latest}"
+    image: "${IMG_REPO:-cnyes-media-be}/cnyes-deployment-cli:${IMG_VERSION:-latest}"
+    network_mode: bridge
