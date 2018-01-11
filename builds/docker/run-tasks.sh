@@ -25,7 +25,7 @@ if [[ ! -z "${PROJECT_NAME}" ]]; then
     COMPOSE_CMD+=("-p" "${PROJECT_NAME}")
 fi
 
-export COMPOSE_EXEC_CMD=("${COMPOSE_CMD[@]}" "exec")
+export DOCKER_EXEC_CMD=("docker" "exec")
 export COMPOSE_RUN_CMD=("${COMPOSE_CMD[@]}" "run" "--rm")
 
 echo "running task section - [ ${TASK_SECTION} ]."
