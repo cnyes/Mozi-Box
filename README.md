@@ -12,5 +12,5 @@ Cnyes Deployment Relative Toolkit is a cli command, that provides a helper comma
 
 ## How to test it.
 ```
-sh> ./vendor/bin/phpunit
+sh> ./vendor/bin/phing
 ```
