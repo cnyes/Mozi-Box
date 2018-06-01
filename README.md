@@ -147,3 +147,43 @@ cronjobs:
       cron_001: {type: ecs, cron: '*/3 * * * ? 2020', task: 'foobar-helper-prod', command: 'cron_001'}
 
 ```
+
+#### iam example policy
+
+based on https://github.com/caltechads/deployfish/issues/12
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "ecs:CreateService",
+                "ecs:Describe*",
+                "ecs:List*",
+                "ecs:UpdateService",
+                "ecs:DeleteService",
+                "ecs:RegisterTaskDefinition",
+                "ecs:RunTask",
+                "ecs:StartTask",
+                "ecs:StopTask",
+                "ecs:SubmitTaskStateChange",
+                "ecr:ListImages",
+                "application-autoscaling:*",
+                "elasticloadbalancing:Describe*",
+                "cloudwatch:DescribeAlarms",
+                "cloudwatch:DeleteAlarms",
+                "cloudwatch:PutMetricAlarm",
+                "events:ListRules",
+                "events:ListTargetsByRule",
+                "events:PutRule",
+                "events:PutTargets",
+                "events:DeleteRule",
+                "events:RemoveTargets"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
+}
+```
