@@ -1,0 +1,75 @@
+from deployfish.cli import cli
+from deployfish.aws.ecs import Service
+from deployfish_ext.core import BatchTask, CrontabJobs
+from deployfish_ext.config import ConfigHelper
+
+import click
+import os
+import sys
+
+
+@cli.group(short_help="Provides extends future for cnyes ecs deployment.")
+def ext():
+    """
+    Provides extends future for cnyes ecs deployment.
+    """
+
+
+@ext.command(
+    'batch_task', short_help="Run one-off task with service helper tasks.")
+@click.pass_context
+@click.argument('service_name')
+@click.argument('task_family')
+@click.argument('command')
+@click.option(
+    '--wait/--no-wait',
+    default=False,
+    help="Don't exit until ecs task is stopped.")
+def batch_task(ctx, service_name, task_family, command, wait):
+    """
+    Run one-off task with COMMAND on service helper tasks FAMILY_NAME.
+    """
+    ConfigHelper.init(ctx)
+    config = ConfigHelper.get_helper_tasks(service_name, task_family)
+    cluster_name = ConfigHelper.get_cluster_name(service_name)
+    batch = BatchTask(yml=config)
+    batch.print_task_def_diff()
+    batch.createOrUpdate()
+    batch.run(command=command, cluster_name=cluster_name, wait=wait)
+
+
+@ext.command(
+    'cron_sync',
+    short_help="Create / update cron jobs list with cloudwatch event.")
+@click.pass_context
+@click.argument('cron_name')
+def cron_sync(ctx, cron_name):
+    """
+    Create / update cron jobs list with cloudwatch event with CRON_NAME.
+    """
+    ConfigHelper.init(ctx)
+    cron_config = ConfigHelper.get_cronjobs_config(cron_name)
+    help_tasks_config = ConfigHelper.get_helper_tasks(cron_name)
+    cluster_name = ConfigHelper.get_cluster_name(cron_name)
+    CrontabJobs(
+        cluster_name=cluster_name,
+        yml_cron=cron_config,
+        yml_help_tasks=help_tasks_config).sync()
+
+
+@ext.command(
+    'service_exists', short_help="Check ecs service is already exists.")
+@click.pass_context
+@click.argument('service_name')
+def service_exists(ctx, service_name):
+    """
+    Check ecs service with SERVICE_NAME is already exists.
+    """
+    ConfigHelper.init(ctx)
+    if Service(ConfigHelper.get_service_config(service_name)).exists():
+        click.secho(
+            "service {} is already exists.".format(service_name), fg="cyan")
+        sys.exit(0)
+    else:
+        click.secho("service {} is not exists.".format(service_name), fg="red")
+        sys.exit(1)

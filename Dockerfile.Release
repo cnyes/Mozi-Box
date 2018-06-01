@@ -1,22 +1,30 @@
+ARG BUILD_IMG_NAME
+ARG BASE_IMG_NAME
+
 #### build stages ####
 
-ARG BUILD_IMG_NAME
 FROM ${BUILD_IMG_NAME} AS build-stage
 
 ARG BUILD_VERSION
 
-RUN composer install --no-interaction --no-dev --no-progress --no-suggest --no-ansi --prefer-dist --optimize-autoloader && \
-    sed -i "s/dev-master/${BUILD_VERSION}/g" ./config/app.php && \
-    ./cnyes-deployment-cli app:build cnyes-deployment-cli
+RUN cd /srv/app/src/bitbucket-cli || exit 1 && \
+    composer install --no-interaction --no-dev --no-progress --no-suggest --no-ansi --prefer-dist --optimize-autoloader && \
+    ./bitbucket-cli app:build -q bitbucket-cli && \
+    mkdir -p /srv/app/dist && \
+    cp ./builds/bitbucket-cli /srv/app/dist && \
+    cd /srv/app/src/deployfish-ext || exit 1 && \
+    make dist && \
+    cp ./dist/deployfish-ext-0.0.1.tar.gz /srv/app/dist
 
 #### final stages ####
 
-FROM php:7.1-cli-alpine
+FROM ${BASE_IMG_NAME}
 
-LABEL maintainer="Cnyes Frontend Team <rd-backend@cnyes.com>"
+ENTRYPOINT []
 
-ENTRYPOINT [ "/usr/bin/cnyes-deployment-cli" ]
+COPY --from=build-stage /srv/app/dist /tmp/dist/
 
-COPY --from=build-stage /srv/app/builds/cnyes-deployment-cli /usr/bin
-
-RUN apk add --no-cache git
+RUN mv /tmp/dist/bitbucket-cli /usr/local/bin && \
+    chmod +x /usr/local/bin/bitbucket-cli && \
+    pip install file:///tmp/dist/deployfish-ext-0.0.1.tar.gz && \
+    rm -rf /tmp/dist

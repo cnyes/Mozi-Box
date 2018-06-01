@@ -1,0 +1,39 @@
+services:
+  - name: foobar-prod
+    count: 1
+    environment: prod
+    cluster: foobar-prod-cluster
+    family: foobar-prod
+    network_mode: bridge
+    containers:
+      - name: web
+        image: nginx:stable
+        cpu: 10
+        memory: 128
+        ports:
+          - "80:80"
+        environment:
+          - ENVIRONMENT=prod
+          - SECRETS_BUCKET_NAME=my-secrets-bucket
+    tasks:
+      - family: foobar-helper-prod
+        environment: prod
+        network_mode: bridge
+        containers:
+          - name: app
+            image: ubuntu:16.04
+            cpu: 30
+            memory: 128
+            environment:
+              - ENVIRONMENT=prod
+              - SECRETS_BUCKET_NAME=my-secrets-bucket
+        commands:
+          test: sleep 60
+          cron_000: date
+          cron_001: ls -al /
+cronjobs:
+  - name: foobar-prod
+    target_role_arn: arn:aws:iam::474918040390:role/service-role/aws_events_ecs_role
+    cron:
+      cron_000: {type: ecs, cron: '*/10 * * * ? 2020', task: 'foobar-helper-prod', command: 'cron_000'}
+      cron_001: {type: ecs, cron: '*/3 * * * ? 2020', task: 'foobar-helper-prod', command: 'cron_001'}

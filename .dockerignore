@@ -1,6 +1,7 @@
-vendor
-builds/
-!builds/*.xml
+src/bitbucket-cli/vendor/**
+src/deployfish-ext/build/**
+src/deployfish-ext/dist/**
+builds/**
 **/.DS_Store
 .git
 Dockerfile*
