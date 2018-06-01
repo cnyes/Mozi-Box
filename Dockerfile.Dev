@@ -1,0 +1,19 @@
+ARG BUILD_IMG_NAME
+FROM ${BUILD_IMG_NAME}
+
+WORKDIR /srv/app
+
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
+COPY ./ /srv/app
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+
+RUN chmod +x /usr/local/bin/composer && \
+    apk update && \
+    apk add ${PHPIZE_DEPS} make && \
+    pip install wheel && \
+    pecl install xdebug && \
+    docker-php-ext-enable xdebug && \
+    cd /srv/app/src/bitbucket-cli || exit 1 && \
+    composer install --no-interaction --no-progress --no-suggest --no-ansi --prefer-dist --optimize-autoloader && \
+    echo "phar.readonly = Off" > /usr/local/etc/php/conf.d/custom.ini

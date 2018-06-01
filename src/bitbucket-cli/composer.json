@@ -25,7 +25,6 @@
     "prefer-stable": true,
     "require-dev": {
         "mockery/mockery": "^1.0",
-        "phing/phing": "^2.16",
         "php-mock/php-mock-mockery": "^1.2",
         "phpunit/phpunit": "~6.4",
         "squizlabs/php_codesniffer": "3.1.1"
@@ -50,7 +49,11 @@
     "scripts": {
         "post-create-project-cmd": [
             "php application app:rename"
+        ],
+        "ci:test": [
+            "./vendor/bin/phpcs --no-colors -p --standard=./phpcs.xml",
+            "./vendor/bin/phpunit -c ./phpunit.xml"
         ]
     },
-    "bin": ["cnyes-deployment-cli"]
+    "bin": ["bitbucket-cli"]
 }
