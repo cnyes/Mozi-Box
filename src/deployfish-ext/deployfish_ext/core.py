@@ -78,50 +78,47 @@ class CrontabJobs(object):
 
     def sync(self):
         try:
-            click.secho('Begin to sync.\n', fg='cyan')
+            LoggingHelper.print_info('begin to sync.')
 
-            click.secho('Begin to prepare task : ', nl=False)
+            LoggingHelper.print_exec_info('begin to prepare task')
             rules_delete = self.__get_need_delete_rules(
                 active_rules=EventsHelper.get_active_rule_list_names(
                     self._name_prefix),
                 desired_rules=self._rules.keys())
-            click.secho('success', fg='green')
+            LoggingHelper.print_exec_success()
 
-            click.secho('\nBegin to update rules.', fg='cyan')
-            click.secho(
-                'Rules that need to create or update : {}'.format(
-                    self._rules.keys()),
-                fg='cyan')
-            click.secho(
-                'Rules that need to deleted : {}'.format(rules_delete),
-                fg='cyan')
-            click.secho('')
+            LoggingHelper.print_info('begin to update rules.')
+            LoggingHelper.print_info(
+                'rules that need to create or update : {}'.format(
+                    self._rules.keys()))
+            LoggingHelper.print_info(
+                'rules that need to deleted : {}'.format(rules_delete))
 
             for rule_name, rule in self._rules.items():
-                msg_prefix = 'Rule [ {} ] '.format(rule_name)
-                click.secho(msg_prefix, nl=False)
-                rule['task_def'].print_task_def_diff()
-                click.secho(msg_prefix, nl=False)
+                LoggingHelper.set_global_prefix(
+                    'rule [ {} ]'.format(rule_name))
+
+                LoggingHelper.print_info(rule['task_def'].get_task_def_diff())
+
                 rule['task_def'].createOrUpdate()
 
-                click.secho(msg_prefix + 'begin to sync : ', nl=False)
+                LoggingHelper.print_exec_info('begin to sync')
                 rule['rule'].createOrUpdate()
                 EventECSTarget(rule['target_id'], self._cluster_arn,
                                rule['task_def'].definition_arn,
                                self._target_role_arn).createOrUpdate(rule_name)
-                click.secho('success', fg='green')
-                click.secho('')
+                LoggingHelper.print_exec_success()
 
             for rule_name in rules_delete:
-                click.secho(
-                    'Rule [ {} ] begin to delete : '.format(rule_name),
-                    nl=False)
+                LoggingHelper.set_global_prefix(
+                    'rule [ {} ]'.format(rule_name))
+                LoggingHelper.print_exec_info('begin to delete')
                 EventsHelper.delete_rule(rule_name)
-                click.secho('success', fg='green')
+                LoggingHelper.print_exec_success()
+        except SystemExit:  # you must have this except in order to exit with right status code.
+            raise
         except:
-            click.secho('error', fg='red')
-            click.secho('\nUnexpected error : ')
-            print traceback.print_exc()
+            LoggingHelper.print_exec_fail()
 
 
 class BatchTask(object):
@@ -154,24 +151,24 @@ class BatchTask(object):
         except KeyError:
             self.active_task_definition = None
 
-    def print_task_def_diff(self):
+    def get_task_def_diff(self):
         self.from_aws(self.desired_task_definition.family)
         expected = str(self.desired_task_definition).splitlines(1)
         actual = str(self.active_task_definition).splitlines(1)
         diff = difflib.unified_diff(expected, actual)
 
-        click.secho(
-            'Diff with desired task def & active task def : ', nl=False)
         diff = ''.join(diff)
         if diff:
-            diff = '\n{}\n'.format(diff)
+            diff = '\n{}'.format(diff)
         else:
-            diff = 'none'
-        click.secho(diff, fg='cyan')
+            diff = 'None'
+
+        return '{} : {}'.format('Diff with desired task def & active task def',
+                                diff)
 
     def createOrUpdate(self):
         try:
-            click.secho('Begin to create or update task def : ', nl=False)
+            LoggingHelper.print_exec_info('begin to create or update task def')
 
             self.from_aws(self.desired_task_definition.family)
             if not str(self.active_task_definition) == str(
@@ -179,22 +176,22 @@ class BatchTask(object):
                 self.desired_task_definition.create()
                 self.active_task_definition = self.desired_task_definition
 
-            click.secho('success', fg='green')
+            LoggingHelper.print_exec_success()
+        except SystemExit:  # you must have this except in order to exit with right status code.
+            raise
         except:
-            click.secho('error', fg='red')
-            click.secho('\nUnexpected error: ')
-            print traceback.print_exc()
+            LoggingHelper.print_exec_fail()
 
     def run(self, command, cluster_name, wait):
         try:
-            click.secho(
-                'Begin to submit command {} with task {} : '.format(
-                    command, self.active_task_definition.family),
-                nl=False)
+            LoggingHelper.print_exec_info(
+                'begin to submit command {} with task {}'.format(
+                    command, self.active_task_definition.family))
 
             if command not in self.commands:
-                raise RuntimeError("Can not found command {} in task {}.",
-                                   command, self.active_task_definition.family)
+                raise RuntimeError(
+                    "Can not found command {} in task {}.".format(
+                        command, self.active_task_definition.family))
 
             response = self.ecs.run_task(
                 cluster=cluster_name,
@@ -208,13 +205,13 @@ class BatchTask(object):
                     }]
                 })
 
-            click.secho('success', fg='green')
+            LoggingHelper.print_exec_success()
 
             if response['failures']:
                 raise RuntimeError(response['failures'][0]['reason'])
 
             if wait:
-                click.secho('Begin to wait for complete : ', nl=False)
+                LoggingHelper.print_exec_info('begin to wait for complete')
                 waiter = self.ecs.get_waiter('tasks_stopped')
                 waiter.wait(
                     cluster=cluster_name,
@@ -223,8 +220,56 @@ class BatchTask(object):
                         'Delay': 10,
                         'MaxAttempts': 10
                     })
-                click.secho('done', fg='green')
+                LoggingHelper.print_exec_success()
+        except SystemExit:  # you must have this except in order to exit with right status code.
+            raise
         except:
-            click.secho('error', fg='red')
+            LoggingHelper.print_exec_fail()
+
+
+class LoggingHelper(object):
+    SUCCESS = 'success'
+    FAILED = 'failed'
+
+    __global_prefix = None
+
+    @staticmethod
+    def set_global_prefix(prefix):
+        LoggingHelper.__global_prefix = prefix
+
+    @staticmethod
+    def print_info(description, need_prefix=True):
+        if need_prefix and LoggingHelper.__global_prefix is not None:
+            description = "{} {}".format(LoggingHelper.__global_prefix,
+                                         description)
+        click.secho(description.title(), fg='cyan')
+
+    @staticmethod
+    def print_exec_info(task_description, need_prefix=True):
+        if need_prefix and LoggingHelper.__global_prefix is not None:
+            task_description = "{} {}".format(LoggingHelper.__global_prefix,
+                                              task_description)
+        click.secho('{} : '.format(task_description).title(), nl=False)
+
+    @staticmethod
+    def __print_exec_status(status):
+        if status == LoggingHelper.SUCCESS:
+            click.secho(LoggingHelper.SUCCESS, fg='green')
+        else:
+            click.secho(LoggingHelper.FAILED, fg='red')
             click.secho('\nUnexpected error: ')
-            print traceback.print_exc()
+            traceback.print_exc()
+            sys.exit(1)
+
+    @staticmethod
+    def print_exec_success():
+        LoggingHelper.__print_exec_status(LoggingHelper.SUCCESS)
+
+    @staticmethod
+    def print_exec_fail():
+        LoggingHelper.__print_exec_status(LoggingHelper.FAILED)
+
+    @staticmethod
+    def print_info_n_exit(description, exit_code):
+        LoggingHelper.print_info(description)
+        sys.exit(exit_code)
