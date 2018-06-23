@@ -1,11 +1,9 @@
 from deployfish.cli import cli
 from deployfish.aws.ecs import Service
-from deployfish_ext.core import BatchTask, CrontabJobs
+from deployfish_ext.core import BatchTask, CrontabJobs, LoggingHelper
 from deployfish_ext.config import ConfigHelper
 
 import click
-import os
-import sys
 
 
 @cli.group(short_help="Provides extends future for cnyes ecs deployment.")
@@ -33,7 +31,7 @@ def batch_task(ctx, service_name, task_family, command, wait):
     config = ConfigHelper.get_helper_tasks(service_name, task_family)
     cluster_name = ConfigHelper.get_cluster_name(service_name)
     batch = BatchTask(yml=config)
-    batch.print_task_def_diff()
+    LoggingHelper.print_info(batch.get_task_def_diff())
     batch.createOrUpdate()
     batch.run(command=command, cluster_name=cluster_name, wait=wait)
 
@@ -67,9 +65,8 @@ def service_exists(ctx, service_name):
     """
     ConfigHelper.init(ctx)
     if Service(ConfigHelper.get_service_config(service_name)).exists():
-        click.secho(
-            "service {} is already exists.".format(service_name), fg="cyan")
-        sys.exit(0)
+        LoggingHelper.print_info_n_exit(
+            "service {} is already exists.".format(service_name), 0)
     else:
-        click.secho("service {} is not exists.".format(service_name), fg="red")
-        sys.exit(1)
+        LoggingHelper.print_info_n_exit(
+            "service {} is not exists.".format(service_name), 1)
