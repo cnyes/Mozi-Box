@@ -207,8 +207,11 @@ class BatchTask(object):
 
             LoggingHelper.print_exec_success()
 
+            ecs_task_arn = None
             if response['failures']:
                 raise RuntimeError(response['failures'][0]['reason'])
+            else:
+                ecs_task_arn = response['tasks'][0]['taskArn']
 
             if wait:
                 LoggingHelper.print_exec_info('begin to wait for complete')
@@ -221,6 +224,26 @@ class BatchTask(object):
                         'MaxAttempts': 10
                     })
                 LoggingHelper.print_exec_success()
+
+                if ecs_task_arn is not None:
+                    LoggingHelper.print_exec_info("exec status of ext_task")
+                    response = self.ecs.describe_tasks(
+                        cluster=cluster_name, tasks=[ecs_task_arn])
+                    if response['failures']:
+                        raise RuntimeError(response['failures'][0]['reason'])
+                    else:
+                        container_info = response['tasks'][0]['containers'][0]
+                        exit_code = container_info['exitCode']
+                        if exit_code == 0:
+                            LoggingHelper.print_exec_success()
+                        else:
+                            LoggingHelper.print_exec_fail(showStackTrace=False)
+                else:
+                    LoggingHelper.print_info('task arn is missing. wtf !!!???')
+            else:
+                LoggingHelper.print_info(
+                    'will always return 0 when you do not wait.')
+
         except SystemExit:  # you must have this except in order to exit with right status code.
             raise
         except:
@@ -252,22 +275,24 @@ class LoggingHelper(object):
         click.secho('{} : '.format(task_description).title(), nl=False)
 
     @staticmethod
-    def __print_exec_status(status):
+    def __print_exec_status(status, showStackTrace):
         if status == LoggingHelper.SUCCESS:
             click.secho(LoggingHelper.SUCCESS, fg='green')
         else:
             click.secho(LoggingHelper.FAILED, fg='red')
-            click.secho('\nUnexpected error: ')
-            traceback.print_exc()
+            if showStackTrace:
+                click.secho('\nUnexpected error: ')
+                traceback.print_exc()
             sys.exit(1)
 
     @staticmethod
-    def print_exec_success():
-        LoggingHelper.__print_exec_status(LoggingHelper.SUCCESS)
+    def print_exec_success(showStackTrace=True):
+        LoggingHelper.__print_exec_status(LoggingHelper.SUCCESS,
+                                          showStackTrace)
 
     @staticmethod
-    def print_exec_fail():
-        LoggingHelper.__print_exec_status(LoggingHelper.FAILED)
+    def print_exec_fail(showStackTrace=True):
+        LoggingHelper.__print_exec_status(LoggingHelper.FAILED, showStackTrace)
 
     @staticmethod
     def print_info_n_exit(description, exit_code):
