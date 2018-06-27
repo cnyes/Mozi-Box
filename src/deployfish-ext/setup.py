@@ -18,7 +18,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "click >= 6.7", "deployfish >= 0.19.1", "boto3 >= 1.4.4"
+        "click >= 6.7", "deployfish >= 0.20.5", "boto3 >= 1.4.4"
     ],
     entry_points={'deployfish.command.plugins': ['ext = deployfish_ext.cli']},
 )
