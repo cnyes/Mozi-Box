@@ -1,0 +1,11 @@
+# encoding: utf-8
+source 'https://rubygems.org'
+
+gem 'test-kitchen', '~> 1.22'
+gem 'inspec', '~> 2.2'
+gem 'rake', '~> 12.3'
+gem 'kitchen-ansible'
+gem 'kitchen-vagrant'
+gem 'kitchen-docker'
+gem 'kitchen-docker_cli'
+gem 'kitchen-inspec', :git => 'https://github.com/chrisLeeTW/kitchen-inspec.git', :branch => 'develop'

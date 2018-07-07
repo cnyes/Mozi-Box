@@ -1,13 +1,37 @@
+#### build stages ####
+
+FROM php:7.1-cli-alpine AS build-stage
+
+WORKDIR /srv/app
+
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
+COPY ./ /srv/app
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+
+RUN apk update && \
+    apk add make python2 py2-pip && \
+    pip install wheel && \
+    chmod +x /usr/local/bin/composer && \
+    echo "phar.readonly = Off" > /usr/local/etc/php/conf.d/custom.ini && \
+    cd /srv/app/src/bitbucket-cli || exit 1 && \
+    composer install --no-interaction --no-dev --no-progress --no-suggest --no-ansi --prefer-dist --optimize-autoloader && \
+    ./bitbucket-cli app:build -q bitbucket-cli && \
+    mkdir -p /srv/app/dist && \
+    cp ./builds/bitbucket-cli /srv/app/dist && \
+    cd /srv/app/src/deployfish-ext || exit 1 && \
+    make dist && \
+    cp ./dist/deployfish-ext-0.0.1.tar.gz /srv/app/dist && \
+    cp -rp /srv/app/src/tools-install /srv/app/dist
+
+#### final stages ####
+
 FROM php:7.1-cli-alpine
 
 LABEL maintainer="Cnyes Backend Team <rd-backend@cnyes.com>"
 
-RUN export terraform_version=0.11.7 && \
-    apk add --no-cache python2 py2-pip jq git && \
-    pip install deployfish==0.19.1 requests && \
-    cd /tmp || exit 1 && \
-    wget -O ./terraform.zip https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip && \
-    unzip ./terraform.zip && \
-    mv terraform /usr/local/bin && \
-    chmod +x /usr/local/bin/terraform && \
-    rm ./terraform.zip
+ENTRYPOINT []
+
+COPY --from=build-stage /srv/app/dist /tmp/dist/
+
+RUN sh /tmp/dist/tools-install/install.sh

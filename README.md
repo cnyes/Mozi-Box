@@ -1,15 +1,25 @@
-# Cnyes Deployment Relative Toolkit
+# Cnyes Mozi-Boxes
 
-Cnyes Deployment Relative Toolkit is a cli command, that provides a erer command collections to jenkins deployment jobs.
+Cnyes Mozi-Boxes is a docker image, that provides a helper command collections to jenkins deployment jobs.
 
 ## Table of contents
 
-* [bitbucket-cli](#markdown-header-bitbucket-cli)
-* [deployfish-ext](#markdown-header-deployfish-extension)
+* [built-in tools](#built-in-tools)
+* [bitbucket-cli](#bitbucket-cli)
+* [deployfish-ext](#deployfish-extension)
+* [docker hub](https://hub.docker.com/r/anue/mozi-boxes)
+
+## Built-in tools
+
+* terraform 0.11.7
+* jq
+* git
+* test-kitchen
+* inspec
 
 ## Bitbucket cli
 
-`bitbucket-cli bitbucket:patch-diff --er`
+`bitbucket-cli bitbucket:patch-diff --help`
 
 ```
 Usage:
@@ -20,7 +30,7 @@ Arguments:
   id                    PRs id arrays that you want to patch.
 
 Options:
-  -h, --er            Display this er message
+  -h, --help            Display this er message
   -q, --quiet           Do not output any message
   -V, --version         Display this application version
       --ansi            Force ANSI output
@@ -45,7 +55,7 @@ Usage: deploy ext [OPTIONS] COMMAND [ARGS]...
   Provides extends future for cnyes ecs deployment.
 
 Options:
-  --er  Show this message and exit.
+  --help  Show this message and exit.
 
 Commands:
   batch_task      Run one-off task with service erer tasks.
