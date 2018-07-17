@@ -20,6 +20,7 @@ rm ./terraform.zip
 cd /tmp/dist/tools-install/test-kitchen || exit 1
 apk add --no-cache --virtual .ruby-builddeps ruby-dev build-base
 bundle install --clean --no-cache -j5
+gem specific_install -l 'https://github.com/chrisLeeTW/kitchen-inspec.git' -b 'develop'
 apk del .ruby-builddeps
 
 # install bitbucket-cli
