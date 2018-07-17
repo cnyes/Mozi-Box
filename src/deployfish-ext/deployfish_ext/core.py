@@ -155,7 +155,7 @@ class BatchTask(object):
         self.from_aws(self.desired_task_definition.family)
         expected = str(self.desired_task_definition).splitlines(1)
         actual = str(self.active_task_definition).splitlines(1)
-        diff = difflib.unified_diff(expected, actual)
+        diff = difflib.unified_diff(actual, expected)
 
         diff = ''.join(diff)
         if diff:
