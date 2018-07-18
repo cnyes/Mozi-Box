@@ -5,6 +5,14 @@ class ConfigHelper(object):
     __config = None
 
     @staticmethod
+    def get_config():
+        if ConfigHelper.__config == None:
+            raise RuntimeError(
+                'ConfigHelper is not be initialized. please call ConfigHelper.init first.'
+            )
+        return ConfigHelper.__config
+
+    @staticmethod
     def get_service_config(service_name):
         if ConfigHelper.__config == None:
             raise RuntimeError(
@@ -46,7 +54,7 @@ class ConfigHelper(object):
     @staticmethod
     def get_cronjobs_config(name):
         try:
-            return ConfigHelper.__config.get_category_item('cronjobs', name)
+            return ConfigHelper.__config.get_section_item('cronjobs', name)
         except KeyError:
             raise RuntimeError(
                 "Can not find the name {} in cronjobs config.".format(name))
