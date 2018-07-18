@@ -64,7 +64,7 @@ def service_exists(ctx, service_name):
     Check ecs service with SERVICE_NAME is already exists.
     """
     ConfigHelper.init(ctx)
-    if Service(ConfigHelper.get_service_config(service_name)).exists():
+    if Service(service_name, config=ConfigHelper.get_config()).exists():
         LoggingHelper.print_info_n_exit(
             "service {} is already exists.".format(service_name), 0)
     else:
