@@ -70,3 +70,19 @@ def service_exists(ctx, service_name):
     else:
         LoggingHelper.print_info_n_exit(
             "service {} is not exists.".format(service_name), 1)
+
+@ext.command(
+    'service_stable', short_help="Wait until ecs service is stable.")
+@click.pass_context
+@click.argument('service_name')
+def service_stable(ctx, service_name):
+    """
+    Wait until ecs service SERVICE_NAME is stable.
+    """
+    ConfigHelper.init(ctx)
+    if Service(service_name, config=ConfigHelper.get_config()).wait_until_stable():
+        LoggingHelper.print_info_n_exit(
+            "service {} is stable.".format(service_name), 0)
+    else:
+        LoggingHelper.print_info_n_exit(
+            "service {} is not stable.".format(service_name), 1)
