@@ -6,7 +6,7 @@ export TERRAFORM_VERSION=0.11.7
 apk add --no-cache --upgrade apk-tools
 
 # install dependencies & bultin-tools
-apk add --no-cache python2 py2-pip jq git bash docker ruby ruby-bundler
+apk add --no-cache python2 py2-pip jq git bash docker ruby ruby-bundler zip
 
 # install terraform
 cd /tmp || exit 1
