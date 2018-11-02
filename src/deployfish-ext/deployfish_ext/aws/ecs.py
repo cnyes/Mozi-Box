@@ -34,3 +34,19 @@ class EcsHelper(object):
                     "Can not find ecs cluster {}".format(cluster_name))
 
         return response['clusters'][0]['clusterArn']
+
+    @staticmethod
+    def service_exists(cluster_name, service_name):
+        EcsHelper.__init()
+        response = EcsHelper.__client.describe_services(
+            cluster=cluster_name,
+            services=[service_name])
+
+        if 'failures' in response and len(response['failures']) >= 1:
+            if response['failures'][0]['reason'] == 'MISSING':
+                return False
+            else:
+                raise RuntimeError(
+                    "unknown error happend - response :\n{}".format(response))
+
+        return True
