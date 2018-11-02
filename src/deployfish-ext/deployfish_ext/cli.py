@@ -2,6 +2,7 @@ from deployfish.cli import cli
 from deployfish.aws.ecs import Service
 from deployfish_ext.core import BatchTask, CrontabJobs, LoggingHelper
 from deployfish_ext.config import ConfigHelper
+from deployfish_ext.aws.ecs import EcsHelper
 
 import click
 
@@ -64,7 +65,8 @@ def service_exists(ctx, service_name):
     Check ecs service with SERVICE_NAME is already exists.
     """
     ConfigHelper.init(ctx)
-    if Service(service_name, config=ConfigHelper.get_config()).exists():
+    cluster_name = ConfigHelper.get_cluster_name(service_name)
+    if EcsHelper.service_exists(cluster_name, service_name):
         LoggingHelper.print_info_n_exit(
             "service {} is already exists.".format(service_name), 0)
     else:
