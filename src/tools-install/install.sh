@@ -27,9 +27,19 @@ apk del .ruby-builddeps
 mv /tmp/dist/bitbucket-cli /usr/local/bin
 chmod +x /usr/local/bin/bitbucket-cli
 
+# pip upgrade
+pip install --upgrade pip
+
 # install deployfish & ext
 pip install file:///tmp/dist/deployfish-ext-0.0.1.tar.gz
 rm -rf /tmp/dist
+
+# install batchbeagle
+cd /tmp || exit 1
+git clone https://github.com/chrisLeeTW/batchbeagle.git
+cd batchbeagle || exit 1
+git checkout temp-release
+python setup.py install
 
 # cleanup
 rm -rf /tmp/dist
