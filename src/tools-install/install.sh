@@ -20,7 +20,6 @@ rm ./terraform.zip
 cd /tmp/dist/tools-install/test-kitchen || exit 1
 apk add --no-cache --virtual .ruby-builddeps ruby-dev build-base
 bundle install --clean --no-cache -j5
-gem specific_install -l 'https://github.com/chrisLeeTW/kitchen-inspec.git' -b 'develop'
 apk del .ruby-builddeps
 
 # install bitbucket-cli
@@ -32,14 +31,12 @@ pip install --upgrade pip
 
 # install deployfish & ext
 pip install file:///tmp/dist/deployfish-ext-0.0.1.tar.gz
-rm -rf /tmp/dist
 
 # install batchbeagle
 cd /tmp || exit 1
-git clone https://github.com/chrisLeeTW/batchbeagle.git
+git clone https://github.com/caltechads/batchbeagle.git
 cd batchbeagle || exit 1
-git checkout temp-release
 python setup.py install
 
 # cleanup
-rm -rf /tmp/dist
+rm -rf /tmp/dist /tmp/batchbeagle
