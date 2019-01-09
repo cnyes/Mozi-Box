@@ -48,5 +48,7 @@ class EcsHelper(object):
             else:
                 raise RuntimeError(
                     "unknown error happend - response :\n{}".format(response))
+        elif response['services'][0]['status'] == 'INACTIVE':
+            return False
 
         return True
