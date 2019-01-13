@@ -35,3 +35,5 @@ ENTRYPOINT []
 COPY --from=build-stage /srv/app/dist /tmp/dist/
 
 RUN sh /tmp/dist/tools-install/install.sh
+
+ENV PATH=${PATH}:/google-cloud-sdk/bin
