@@ -1,7 +1,7 @@
 # encoding: utf-8
 source 'https://rubygems.org'
 
-gem 'test-kitchen', '~> 1.22'
+gem 'test-kitchen', '1.23.2'
 gem 'inspec', '~> 2.2'
 gem 'rake', '~> 12.3'
 gem 'kitchen-docker_cli'
