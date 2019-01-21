@@ -38,5 +38,14 @@ git clone https://github.com/caltechads/batchbeagle.git
 cd batchbeagle || exit 1
 python setup.py install
 
+# install gcloud & kubectl
+cd /
+wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-218.0.0-linux-x86_64.tar.gz
+tar -xzvf google-cloud-sdk-218.0.0-linux-x86_64.tar.gz
+rm google-cloud-sdk-218.0.0-linux-x86_64.tar.gz
+
+/google-cloud-sdk/bin/gcloud components update --quiet
+/google-cloud-sdk/bin/gcloud components install kubectl --quiet
+
 # cleanup
 rm -rf /tmp/dist /tmp/batchbeagle

@@ -16,6 +16,8 @@ Cnyes Mozi-Boxes is a docker image, that provides a helper command collections t
 * git
 * test-kitchen
 * inspec
+* gcloud
+* kubectl
 
 ## Bitbucket cli
 
