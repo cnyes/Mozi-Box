@@ -7,22 +7,31 @@ else
   SEARCH=($(ls -A ${SEARCH_TARGET}))
 fi
 
-for log in "${SEARCH[@]}"; do
-  echo "Copy ${log} to ${UPLOAD_URL}/${log##*/}"
-
-  if [[ -z ${UPLOAD_TO_GCS} ]]; then
-    echo "Ignore ${log} to upload to gcs"
-  else
-    gsutil cp ${log} ${UPLOAD_URL}/${log##*/} || exit 0
-    echo "Upload ${log} to ${UPLOAD_URL}/${log##*/} Success..."
-  fi
-
+rm -rf /upload; mkdir /upload
+for upload in "${SEARCH[@]}"; do
+  echo "Copy ${upload} into /upload folder"
+  cp ${upload} /upload/.
   if [[ -z ${REQUIRE_DELETE} ]]; then
-    echo "Ignore removing ${log}"
+    echo "Ignore remove ${upload}"
   else
-    rm ${log} || exit 1
-    echo "${log} deleted"
+    rm ${upload} || exit 1
+    echo "${upload} deleted"
   fi
 done
 
-echo "Done..."
+UPLOAD=($(ls -A /upload/*.*))
+
+for upload in "${UPLOAD[@]}"; do
+  echo "Upload ${upload} to ${UPLOAD_URL}/${upload##*/}"
+
+  if [[ -z ${UPLOAD_TO_GCS} ]]; then
+    echo "Ignore ${upload} to upload to gcs"
+  else
+    gsutil cp ${upload} ${UPLOAD_URL}/${upload##*/} || exit 1
+    echo "Upload ${upload} to ${UPLOAD_URL}/${upload##*/} Success..."
+  fi
+done
+
+rm -rf /upload
+
+echo "Done ..."
