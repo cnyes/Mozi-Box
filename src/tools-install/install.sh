@@ -47,5 +47,8 @@ rm google-cloud-sdk-218.0.0-linux-x86_64.tar.gz
 /google-cloud-sdk/bin/gcloud components update --quiet
 /google-cloud-sdk/bin/gcloud components install kubectl --quiet
 
+mkdir /.config
+chmod 777 /.config
+
 # cleanup
 rm -rf /tmp/dist /tmp/batchbeagle
