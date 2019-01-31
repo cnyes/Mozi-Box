@@ -47,5 +47,12 @@ rm google-cloud-sdk-218.0.0-linux-x86_64.tar.gz
 /google-cloud-sdk/bin/gcloud components update --quiet
 /google-cloud-sdk/bin/gcloud components install kubectl --quiet
 
+# install helm
+wget https://storage.googleapis.com/kubernetes-helm/helm-v2.12.3-linux-amd64.tar.gz
+tar -zxvf helm-v2.12.3-linux-amd64.tar.gz
+rm helm-v2.12.3-linux-amd64.tar.gz
+mv linux-amd64/helm /usr/local/bin/helm
+rm -rf linux-amd64
+
 # cleanup
 rm -rf /tmp/dist /tmp/batchbeagle
