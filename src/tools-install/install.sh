@@ -54,5 +54,9 @@ rm helm-v2.12.3-linux-amd64.tar.gz
 mv linux-amd64/helm /usr/local/bin/helm
 rm -rf linux-amd64
 
+# set Asia/Taipei as localtime
+apk add tzdata
+cp /usr/share/zoneinfo/Asia/Taipei /etc/localtime
+
 # cleanup
 rm -rf /tmp/dist /tmp/batchbeagle
